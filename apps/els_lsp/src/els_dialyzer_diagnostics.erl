@@ -54,6 +54,7 @@ run(Uri) ->
                         {from, src_code},
                         {include_dirs, els_config:get(include_paths)},
                         {plts, [DialyzerPltPath]},
+                        {warnings, [no_return, no_unused]},
                         {defines, defines()}
                     ])
                 catch

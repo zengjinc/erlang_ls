@@ -63,13 +63,24 @@ find_and_deeply_index_file(FileName) ->
 
 -spec is_generated_file(binary(), string()) -> boolean().
 is_generated_file(Text, Tag) ->
-    [Line | _] = string:split(Text, "\n", leading),
-    case re:run(Line, Tag) of
-        {match, _} ->
-            true;
-        nomatch ->
-            false
-    end.
+    F = fun(Line) ->
+        case re:run(Line, Tag) of
+            {match, _} ->
+                true;
+            nomatch ->
+                false
+        end
+    end,
+    SplitList = string:split(Text, "\n", leading),
+    lists:any(F, lists:sublist(SplitList, 10)).
+
+    % [Line | _] = string:split(Text, "\n", leading),
+    % case re:run(Line, Tag) of
+    %     {match, _} ->
+    %         true;
+    %     nomatch ->
+    %         false
+    % end.
 
 -spec ensure_deeply_indexed(uri()) -> els_dt_document:item().
 ensure_deeply_indexed(Uri) ->
