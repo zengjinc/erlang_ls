@@ -792,7 +792,10 @@ exported_definitions(Module, POIKind, ItemFormat) ->
             case els_utils:lookup_document(Uri) of
                 {ok, Document} ->
                     AtomPois = els_dt_document:pois(Document, [atom]),
-                    ExportAll = [1 || #{id := export_all} <- AtomPois] =/= [],
+                    ExportAll = lists:any(
+                        fun (#{id := export_all}) -> true; (_) -> false end,
+                        AtomPois
+                    ),
                     ExportedOnly = not ExportAll,
                     definitions(Document, POIKind, ItemFormat, ExportedOnly);
                 {error, _} ->
