@@ -29,3 +29,7 @@ doc
 # Emacs temporary files
 .#*
 *#
+
+fetch_from_upstream.sh
+make.sh
+备注.md
