@@ -1,0 +1,46 @@
+otp_path: "/usr/local/lib/erlang23/lib/erlang"
+# otp_path: "/usr/local/lib/erlang24/lib/erlang" debug attack 需要保持otp版本一致
+
+apps_dirs:
+  - "src"
+  - "src/*"
+  - "src/**/*"
+  - "src/***/**/*"
+  - "apps/*/src"
+  - "apps/**/*/src"
+  - "dynamic/src"
+
+include_dirs:
+  - "include"
+  - "include/*"
+  - "apps/*/include"
+
+diagnostics:
+  enabled:
+    - crossref
+    - bound_var_in_pattern
+    - unused_includes
+    - unused_macros
+    - dialyzer
+  disabled:
+    - elvis
+
+plt_path: "/home/jingle/.dialyzer_plt"
+
+lenses:    
+  disabled:
+    - function-references
+    - suggest-spec
+    - show-behaviour-usages
+    - ct-run-test
+
+incremental_sync: false
+
+indexing:
+  skip_generated_files: true
+  generated_files_tag: "@Description"
+
+runtime:
+  use_long_names: true
+  domain: ""
+  hostname: "127.0.0.1"
