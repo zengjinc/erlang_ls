@@ -45,26 +45,35 @@ run(Uri) ->
             [];
         DialyzerPltPath ->
             {ok, Document} = els_utils:lookup_document(Uri),
-            Deps = [dep_path(X) || X <- els_diagnostics_utils:dependencies(Uri)],
-            Files = [els_utils:to_list(Path) | Deps],
-            WS =
-                try
-                    dialyzer:run([
-                        {files, Files},
-                        {from, src_code},
-                        {include_dirs, els_config:get(include_paths)},
-                        {plts, [DialyzerPltPath]},
-                        {defines, defines()}
-                    ])
-                catch
-                    Type:Error ->
-                        ?LOG_ERROR(
-                            "Error while running dialyzer [type=~p] [error=~p]",
-                            [Type, Error]
-                        ),
-                        []
-                end,
-            [diagnostic(Document, W) || W <- WS]
+            #{text := Text} = Document,
+            SkipTag = els_config_indexing:get_generated_files_tag(),
+            case els_indexing:is_generated_file(Text, SkipTag) of
+                true ->
+                    ?LOG_ERROR("Skip dialyzer for generated file ~p", [Uri]),
+                    [];
+                false ->
+                    Deps = [dep_path(X) || X <- els_diagnostics_utils:dependencies(Uri)],
+                    Files = [els_utils:to_list(Path) | Deps],
+                    WS =
+                        try
+                            dialyzer:run([
+                                {files, Files},
+                                {from, src_code},
+                                {include_dirs, els_config:get(include_paths)},
+                                {plts, [DialyzerPltPath]},
+                                {warnings, [no_return, no_unused]},
+                                {defines, defines()}
+                            ])
+                        catch
+                            Type:Error ->
+                                ?LOG_ERROR(
+                                    "Error while running dialyzer [type=~p] [error=~p]",
+                                    [Type, Error]
+                                ),
+                                []
+                        end,
+                    [diagnostic(Document, W) || W <- WS]
+            end
     end.
 
 -spec source() -> binary().

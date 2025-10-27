@@ -38,13 +38,21 @@ run(Uri) ->
         {error, _Error} ->
             [];
         {ok, Document} ->
-            POIs = els_dt_document:pois(Document, [
-                application,
-                implicit_fun,
-                import_entry,
-                export_entry
-            ]),
-            [make_diagnostic(POI) || POI <- POIs, not has_definition(POI, Document)]
+            #{text := Text} = Document,
+            SkipTag = els_config_indexing:get_generated_files_tag(),
+            case els_indexing:is_generated_file(Text, SkipTag) of
+                true ->
+                    ?LOG_ERROR("Skip crossref for generated file ~p", [Uri]),
+                    [];
+                false ->
+                    POIs = els_dt_document:pois(Document, [
+                        application,
+                        implicit_fun,
+                        import_entry,
+                        export_entry
+                    ]),
+                    [make_diagnostic(POI) || POI <- POIs, not has_definition(POI, Document)]
+            end
     end.
 
 -spec source() -> binary().

@@ -130,6 +130,7 @@ initialize(RootUri, Capabilities, InitOptions, ErrorReporting) ->
 
 -spec do_initialize(uri(), map(), map(), {undefined | path(), map()}) -> ok.
 do_initialize(RootUri, Capabilities, InitOptions, {ConfigPath, Config}) ->
+    put(erls_dirs, maps:get("erls_dirs", Config, [])),
     RootPath = els_utils:to_list(els_uri:path(RootUri)),
     OtpPath = maps:get("otp_path", Config, code:root_dir()),
     ?LOG_INFO("OTP Path: ~p", [OtpPath]),
@@ -441,9 +442,8 @@ project_paths(RootPath, Dirs, Recursive) ->
     Paths = [
         els_utils:resolve_paths(
             [
-                [RootPath, Dir, "src"],
-                [RootPath, Dir, "test"],
-                [RootPath, Dir, "include"]
+                [RootPath, Dir]
+                | [[RootPath, Dir, Src] || Src <- erlang:get(erls_dirs)]
             ],
             Recursive
         )
